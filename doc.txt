@@ -1,0 +1,5 @@
+COMANDS:
+
+npx prisma migrate dev --name CreateUser
+npx prisma generate  // Criar o Client
+npm run start:dev
