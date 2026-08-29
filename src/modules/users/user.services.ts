@@ -4,13 +4,14 @@ import { User } from '../../../generated/prisma/client';
 import { UpdateUserDto } from './domain/dto/updateUser.dto';
 import { CreateUserDto } from './domain/dto/createUser.dto';
 import * as bcrypt from 'bcrypt';
+import { userSelectFields } from '../prisma/utils/userSelectFields';
 
 @Injectable()
 export class UserService {
   constructor(private readonly prisma: PrismaService) {}
 
   async listUsers() {
-    return await this.prisma.user.findMany();
+    return await this.prisma.user.findMany({ select: userSelectFields });
   }
 
   async showUserById(id: number) {
@@ -27,6 +28,7 @@ export class UserService {
         password: hashedPassword,
         ...(body.role !== undefined ? { role: body.role } : { role: 'USER' }),
       },
+      select: userSelectFields,
     });
   }
 
@@ -40,6 +42,7 @@ export class UserService {
     return await this.prisma.user.update({
       where: { id },
       data: body,
+      select: userSelectFields,
     });
   }
 
@@ -49,9 +52,16 @@ export class UserService {
     return await this.prisma.user.delete({ where: { id } });
   }
 
+  async findUserByEmail(email: string): Promise<User | null> {
+    return await this.prisma.user.findUnique({
+      where: { email },
+    });
+  }
+
   private async isIdExist(id: number) {
     const user = await this.prisma.user.findUnique({
       where: { id },
+      select: userSelectFields,
     });
 
     if (!user) {

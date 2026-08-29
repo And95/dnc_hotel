@@ -1,0 +1,33 @@
+import {
+  Body,
+  Controller,
+  HttpCode,
+  HttpStatus,
+  Patch,
+  Post,
+} from '@nestjs/common';
+import { AuthLoginDto } from './domain/dto/authLogin.dto';
+import { AuthService } from './auth.service';
+import { AuthRegisterDto } from './domain/dto/authRegister.dto';
+import { AuthResetPasswordDTO } from './domain/dto/authResetPassword.dto';
+
+@Controller('auth')
+export class AuthController {
+  constructor(private readonly authService: AuthService) {}
+
+  @Post('login')
+  @HttpCode(HttpStatus.OK)
+  login(@Body() body: AuthLoginDto) {
+    return this.authService.login(body);
+  }
+
+  @Post('register')
+  register(@Body() body: AuthRegisterDto) {
+    return this.authService.register(body);
+  }
+
+  @Patch('reset-password')
+  async resetPassword(@Body() { token, password }: AuthResetPasswordDTO) {
+    return this.authService.resetPassword({ token, password });
+  }
+}
