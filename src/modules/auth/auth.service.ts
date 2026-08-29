@@ -8,12 +8,7 @@ import * as bcrypt from 'bcrypt';
 import { CreateUserDto } from '../users/domain/dto/createUser.dto';
 import { AuthRegisterDto } from './domain/dto/authRegister.dto';
 import { AuthResetPasswordDTO } from './domain/dto/authResetPassword.dto';
-
-interface JwtPayload {
-  sub: number;
-  email: string;
-  role: string;
-}
+import { JwtPayload, ValidateTokenDTO } from './domain/dto/validateToken.dto';
 
 @Injectable()
 export class AuthService {
@@ -23,10 +18,13 @@ export class AuthService {
     private readonly userService: UserService,
   ) {}
 
-  async generateJwtToken(user: User): Promise<{ access_token: string }> {
+  async generateJwtToken(
+    user: User,
+    expiresIn: JwtSignOptions['expiresIn'] = '1d',
+  ): Promise<{ access_token: string }> {
     const payload = { sub: user.id, name: user.name };
     const options: JwtSignOptions = {
-      expiresIn: '1h',
+      expiresIn: expiresIn,
       issuer: 'dnc_hotel',
       audience: 'users',
     };
@@ -72,14 +70,57 @@ export class AuthService {
     if (!token) throw new UnauthorizedException('Invalid token');
 
     try {
-      const decoded = await this.jwtService.verifyAsync<JwtPayload>(token);
-      const user = await this.userService.updateUserById(decoded.sub, {
-        password,
-      });
+      const result = await this.validateToken(token);
+
+      if (!result.valid || !result.decoded)
+        throw new UnauthorizedException('Invalid token');
+
+      const user = await this.userService.updateUserById(
+        Number(result.decoded.sub),
+        {
+          password,
+        },
+      );
 
       return this.generateJwtToken(user);
     } catch {
       throw new UnauthorizedException('Invalid token');
+    }
+  }
+
+  async forgot(email: string) {
+    const user = await this.userService.findUserByEmail(email);
+
+    if (!user) {
+      throw new UnauthorizedException('Email is incorrect');
+    }
+
+    const token = this.generateJwtToken(user, '30m');
+
+    //Enviar o email com o token jwt para resetar a senha
+    return token;
+  }
+
+  private async validateToken(token: string): Promise<ValidateTokenDTO> {
+    try {
+      const decoded = await this.jwtService.verifyAsync<JwtPayload>(token, {
+        secret: process.env.JWT_SECRET,
+        issuer: 'dnc_hotel',
+        audience: 'users',
+      });
+
+      return {
+        valid: true,
+        decoded,
+      };
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error ? error.message : 'Token validation failed';
+
+      return {
+        valid: false,
+        message,
+      };
     }
   }
 }
