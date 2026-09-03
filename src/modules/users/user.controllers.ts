@@ -12,6 +12,8 @@ import { CreateUserDto } from './domain/dto/createUser.dto';
 import { UpdateUserDto } from './domain/dto/updateUser.dto';
 import { ParamId } from '../shared/decorators/paramId.decorator';
 import { AuthGuard } from '../shared/guards/auth.guard';
+import type { User as UserType } from '../../../generated/prisma/client';
+import { User } from '../shared/decorators/user.decorator';
 
 @UseGuards(AuthGuard)
 @Controller('users')
@@ -19,7 +21,8 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Get()
-  listUsers() {
+  listUsers(@User('email') user: UserType) {
+    console.log('User:', user); // Log the user for debugging
     return this.userService.listUsers();
   }
 
