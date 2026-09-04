@@ -17,12 +17,16 @@ import { RoleGuard } from '../shared/guards/role.guard';
 import { User } from '../shared/decorators/user.decorator';
 import { Roles } from '../shared/decorators/roles.decorator';
 import { UserMatchGuard } from '../shared/guards/userMatch.guard';
+import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
 
-@UseGuards(AuthGuard, RoleGuard)
+@UseGuards(AuthGuard, RoleGuard, ThrottlerGuard)
 @Controller('users')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
+  //@SkipThrottle()
+  //@Throttle({ default: { limit: 3, ttl: 50000 } })
+  @Throttle({ default: { limit: 20, ttl: 500000 } })
   @Get()
   listUsers(@User('email') user: UserType) {
     console.log('User:', user); // Log the user for debugging
