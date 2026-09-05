@@ -2,20 +2,21 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService, JwtSignOptions } from '@nestjs/jwt';
 import { User } from '../../../generated/prisma/browser';
 import { AuthLoginDto } from './domain/dto/authLogin.dto';
-import { PrismaService } from '../prisma/prisma.service';
 import { UserService } from '../users/user.services';
 import * as bcrypt from 'bcrypt';
 import { CreateUserDto } from '../users/domain/dto/createUser.dto';
 import { AuthRegisterDto } from './domain/dto/authRegister.dto';
 import { AuthResetPasswordDTO } from './domain/dto/authResetPassword.dto';
 import { JwtPayload, ValidateTokenDTO } from './domain/dto/validateToken.dto';
+import { MailerService } from '@nestjs-modules/mailer';
+import { templateHTML } from './utils/templateHTML';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly jwtService: JwtService,
-    private readonly prisma: PrismaService,
     private readonly userService: UserService,
+    private readonly mailerService: MailerService,
   ) {}
 
   async generateJwtToken(
@@ -95,10 +96,16 @@ export class AuthService {
       throw new UnauthorizedException('Email is incorrect');
     }
 
-    const token = this.generateJwtToken(user, '30m');
+    const token = await this.generateJwtToken(user, '30m');
 
     //Enviar o email com o token jwt para resetar a senha
-    return token;
+    await this.mailerService.sendMail({
+      to: email,
+      subject: 'Reset Password - DNC Hotel',
+      html: templateHTML(user.name, token.access_token),
+    });
+
+    return `A verification code has been sent to ${email}`;
   }
 
   async validateToken(token: string): Promise<ValidateTokenDTO> {

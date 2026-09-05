@@ -3,6 +3,7 @@ import { PrismaModule } from './modules/prisma/prisma.module';
 import { UserModule } from './modules/users/user.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { MailerModule } from '@nestjs-modules/mailer';
 
 @Module({
   imports: [
@@ -15,6 +16,15 @@ import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
         limit: 3,
       },
     ]),
+    MailerModule.forRoot({
+      transport: {
+        host: process.env.SMTP_HOST,
+        port: Number(process.env.SMTP_PORT),
+      },
+      defaults: {
+        from: `"dnc_hotel" <${process.env.EMAIL_FROM}>`,
+      },
+    }),
   ],
   providers: [
     {
