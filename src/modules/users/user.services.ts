@@ -35,6 +35,7 @@ export class UserService {
         email: body.email!,
         password: hashedPassword,
         ...(body.role !== undefined ? { role: body.role } : { role: 'USER' }),
+        avatar: null,
       },
       select: userSelectFields,
     });
