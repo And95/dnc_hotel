@@ -1,4 +1,10 @@
-import { IsEmail, IsEnum, IsNotEmpty, IsString } from 'class-validator';
+import {
+  IsEmail,
+  IsEnum,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 import { Role } from '../../../../../generated/prisma/client';
 
 export class CreateUserDto {
@@ -17,4 +23,7 @@ export class CreateUserDto {
   @IsString()
   @IsEnum(Role)
   role: Role | undefined;
+
+  @IsOptional()
+  avatar?: string;
 }

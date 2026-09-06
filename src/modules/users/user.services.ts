@@ -10,6 +10,8 @@ import { UpdateUserDto } from './domain/dto/updateUser.dto';
 import { CreateUserDto } from './domain/dto/createUser.dto';
 import * as bcrypt from 'bcrypt';
 import { userSelectFields } from '../prisma/utils/userSelectFields';
+import { stat, unlink } from 'fs/promises';
+import { join, resolve } from 'path';
 
 @Injectable()
 export class UserService {
@@ -65,6 +67,28 @@ export class UserService {
     return await this.prisma.user.findUnique({
       where: { email },
     });
+  }
+
+  async uploadAvatar(id: number, avatarFilename: string) {
+    const user = await this.isIdExist(id);
+    const directory = resolve(__dirname, '..', '..', '..', 'uploads');
+
+    if (user.avatar) {
+      const userAvatarFilePath = join(directory, String(user.avatar));
+      const userAvatarFileExists = await stat(userAvatarFilePath).catch(
+        () => null,
+      );
+
+      if (userAvatarFileExists !== null) {
+        await unlink(userAvatarFilePath);
+      }
+    }
+
+    const userUpdated = await this.updateUserById(id, {
+      avatar: avatarFilename,
+    });
+
+    return userUpdated;
   }
 
   private async isIdExist(id: number) {
