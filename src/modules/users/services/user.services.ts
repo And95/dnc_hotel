@@ -15,6 +15,9 @@ import { join, resolve } from 'path';
 
 @Injectable()
 export class UserService {
+  show(ownerId: number) {
+    throw new Error('Method not implemented.');
+  }
   constructor(private readonly prisma: PrismaService) {}
 
   async listUsers() {
