@@ -12,18 +12,21 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { UserService } from './user.services';
-import { CreateUserDto } from './domain/dto/createUser.dto';
-import { UpdateUserDto } from './domain/dto/updateUser.dto';
-import { ParamId } from '../shared/decorators/paramId.decorator';
-import { AuthGuard } from '../shared/guards/auth.guard';
-import { Role, type User as UserType } from '../../../generated/prisma/client';
-import { RoleGuard } from '../shared/guards/role.guard';
-import { User } from '../shared/decorators/user.decorator';
-import { Roles } from '../shared/decorators/roles.decorator';
-import { UserMatchGuard } from '../shared/guards/userMatch.guard';
+import { UserService } from '../services/user.services';
+import { CreateUserDto } from '../domain/dto/createUser.dto';
+import { UpdateUserDto } from '../domain/dto/updateUser.dto';
+import { ParamId } from '../../shared/decorators/paramId.decorator';
+import { AuthGuard } from '../../shared/guards/auth.guard';
+import {
+  Role,
+  type User as UserType,
+} from '../../../../generated/prisma/client';
+import { RoleGuard } from '../../shared/guards/role.guard';
+import { User } from '../../shared/decorators/user.decorator';
+import { Roles } from '../../shared/decorators/roles.decorator';
+import { UserMatchGuard } from '../../shared/guards/userMatch.guard';
 import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
-import { FileValidationInterceptor } from '../shared/interceptors/fileValidation.interceptor';
+import { FileValidationInterceptor } from '../../shared/interceptors/fileValidation.interceptor';
 import { FileInterceptor } from '@nestjs/platform-express';
 
 @UseGuards(AuthGuard, RoleGuard, ThrottlerGuard)

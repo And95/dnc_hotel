@@ -4,12 +4,12 @@ import {
   HttpStatus,
   Injectable,
 } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
-import { User } from '../../../generated/prisma/client';
-import { UpdateUserDto } from './domain/dto/updateUser.dto';
-import { CreateUserDto } from './domain/dto/createUser.dto';
+import { PrismaService } from '../../prisma/prisma.service';
+import { User } from '../../../../generated/prisma/client';
+import { UpdateUserDto } from '../domain/dto/updateUser.dto';
+import { CreateUserDto } from '../domain/dto/createUser.dto';
 import * as bcrypt from 'bcrypt';
-import { userSelectFields } from '../prisma/utils/userSelectFields';
+import { userSelectFields } from '../../prisma/utils/userSelectFields';
 import { stat, unlink } from 'fs/promises';
 import { join, resolve } from 'path';
 
